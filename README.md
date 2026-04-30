@@ -62,3 +62,95 @@ The repository is organized to support dataset construction, model training, and
 │── 📜 README.md                     
 └── ...
 ```
+
+---
+## 📊 BioCon: Data Format
+Each sample consists of:
+```JSON
+{
+  "paper": "...",
+  "repo": "...",
+  "sentence": "...",
+  "code": "...",
+  "label": 0 or 1
+}
+```
+
+---
+
+## 💻 Experiments
+### 📥 Install
+```sh
+conda env create -f environment.yml
+```
+
+### 🚀 Training
+```sh
+python run.py \
+    --num_labels=2 \
+    --train_data_file=./data/BioCon/train.jsonl \
+    --eval_data_file=./data/BioCon/valid.jsonl \
+    --output_dir=./saved_models \
+    --runs_path=./runs \
+    --model_type=UniXcoder \
+    --tokenizer_name=./pre \
+    --model_name_or_path=./pre \
+    --do_train \
+    --epoch 10 \
+    --block_size 512 \
+    --train_batch_size 16 \
+    --eval_batch_size 16 \
+    --learning_rate 2e-5 \
+    --evaluate_during_training \
+    --seed 123456
+```
+
+### 📈 Evaluation
+#### Sentence-level
+```sh
+python test.py \
+    --test_data_file=./data/BioCon/test.jsonl \
+    --output_dir=./saved_models \
+    --results_path=./results \
+    --model_type=UniXcoder \
+    --tokenizer_name=./pre \
+    --model_name_or_path=./pre \
+    --do_test \
+    --block_size 512 \
+    --eval_batch_size 16 \
+    --seed 123456
+```
+
+#### Retrieval-level
+```sh
+python retrieval_test.py \
+    --test_data_file=./data/BioCon/retrieval_in-test.jsonl \
+    ...
+```
+
+#### Project-level
+```sh
+python retrieval_test.py \
+    --test_data_file=./data/BioCon/software_test.jsonl \
+    ...
+```
+
+#### Case Study
+```sh
+python case_test.py \
+    --test_data_file=./data/case/case_dataset.jsonl \
+    ...
+```
+
+## 🔮 Future Work
+- Cross-project generalization
+- Fine-grained consistency modeling
+- Improved sentence filtering
+- Integration with structured code representations
+
+---
+
+## 📜 License
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
