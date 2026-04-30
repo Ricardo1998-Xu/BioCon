@@ -23,50 +23,42 @@ To address this problem, we propose:
 ---
 
 ## 📂 Repository Structure
-```bash
+The repository is organized to support dataset construction, model training, and multi-level evaluation, including sentence-level classification, cross-modal retrieval, and project-level consistency analysis.
 
-│── 📁 data/                     # Contains datasets used in the study
-│   ├── 📂 BioCon/                  # The BioCon dataset
-│   │   ├── 📜 train.jsonl          # Training dataset
-│   │   ├── 📜 test.jsonl           # Testing dataset (Sentence-level classification)
-│   │   ├── 📜 valid.jsonl          # valid dataset
-│   │   ├── 📜 BioCon.jsonl         # train + valid + test
-│   │   ├── 📜 retrieval_in-test.jsonl         # Intra-project retrieva
-│   │   ├── 📜 software_test.jsonl         # project-level consistency
+```bash
+│── 📁 data/                         # Datasets and data processing resources
+│   ├── 📂 BioCon/                   # BioCon benchmark dataset
+│   │   ├── 📂 raw/          
+│   │   │   ├── 📂 papers_pdf/       # Raw research papers (PDF format)
+│   │   │   ├── 📂 repos/            # Corresponding source code repositories
+│   │   ├── 📂 processed/            # Intermediate processed artifacts
+│   │   ├── 📜 train.jsonl           # Training set
+│   │   ├── 📜 test.jsonl            # Test set (sentence-level classification)
+│   │   ├── 📜 valid.jsonl           # Validation set
+│   │   ├── 📜 BioCon.jsonl          # Full dataset (train + valid + test)
+│   │   ├── 📜 retrieval_in-test.jsonl   # Intra-project retrieval dataset
+│   │   ├── 📜 software_test.jsonl   # Project-level consistency evaluation dataset
 │   │   └── ...
-│   ├── 📂 MRPC/
-│   ├── 📂 SST-5/              
-│   └── ...               
+│   │
+│   ├── 📂 case/                     # Case study dataset
+│   │   ├── 📂 raw/          
+│   │   │   ├── 📂 papers_pdf/       # Raw papers used in case study
+│   │   │   ├── 📂 repos/            # Corresponding repositories
+│   │   ├── 📂 processed/            # Processed case study artifacts
+│   │   └── 📜 case_dataset.jsonl    # Constructed case study dataset  
+│   │
+│   ├── 📜 0.extract_paper_text.py   # Extract sentence-level text from papers          
+│   ├── 📜 1.tei_to_json.py          # Convert TEI XML to structured JSON
+│   ├── 📜 retrieval_dataset.py      # Construct retrieval datasets
+│   └── ...
 │
-│── 📁 Pre_Dataset/                 # Preference datasets
-│   ├── 📂 CoLA/                    # The CoLA dataset
-│   │   ├── 📜 train.jsonl          # Training dataset
-│   │   ├── 📜 test.jsonl           # Testing dataset
-│   │   ├── 📜 valid.jsonl          # valid dataset
-│   │   └── ...
-│   ├── 📂 MRPC/
-│   ├── 📂 SST-5/              
-│   └── ...                    
-│
-│── 📁 Code/            # Implementations of classification models
-│   ├── 🤖 bert/                    # BERT model implementation
-│   │   ├── 📜 clss_indices.json    # Label mapping file
-│   │   ├── 📜 model.py             # Model definition
-│   │   ├── 📜 RewardModel.py       # Reward model definition
-│   │   ├── 📜 run.py               # Script for fine-tuning the model
-│   │   ├── 📜 run_RL.py            # RL optimization
-│   │   ├── 📜 run_RM.py            # Script for training the RM
-│   │   ├── 📜 test.py              # Script for model evaluation
-│   │   └── ...
-│   ├── 🤖 codebert/                # CodeBERT model implementation
-│   ├── 🤖 t5/                      # T5 model implementation
-│   ├── 🤖 codet5/                  # CodeT5 model implementation
-│   ├── 🤖 codet5+/                 # CodeT5+ model implementation
-│   ├── 🤖 opt/                     # OPT model implementation
-│   ├── 🤖 codegen/                 # CodeGen model implementation
-│   └── 🤖 qwen3/                   # QWen3 model implementation
-│   
-│── 📜 environment.yaml             # Environment configuration file
-│── 📜 README.md                    
+│── 📜 model.py                      # Model architecture definition
+│── 📜 run.py                        # Training script
+│── 📜 test.py                       # Sentence-level classification evaluation
+│── 📜 retrieval_test.py             # Retrieval evaluation
+│── 📜 project_test.py               # Project-level consistency evaluation
+│── 📜 case_test.py                  # Case study analysis
+│── 📜 environment.yaml              # Environment configuration
+│── 📜 README.md                     
 └── ...
 ```
