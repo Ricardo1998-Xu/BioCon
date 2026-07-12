@@ -2,7 +2,7 @@ import json
 import random
 from pathlib import Path
 from tqdm import tqdm
-
+random.seed(2)
 
 def BioCon(retrieval_dir, output_file):
     retrieval_dir = Path(retrieval_dir)
