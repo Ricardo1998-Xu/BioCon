@@ -1,0 +1,120 @@
+import os
+import glob
+from PIL import Image
+
+import numpy as np
+import pandas as pd
+import scanpy as sc
+import matplotlib
+import matplotlib.pyplot as plt
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import math
+
+import scipy
+import random
+import statistics
+import pyreadr
+import seaborn as sns
+from IPython.display import clear_output
+
+def df_time_prediction(cell_type, model, anndata, test_time):
+    NvarGenes = anndata.shape[1]
+
+    AE = model
+    cell_use = (anndata.obs.Idents == cell_type) #& (anndata.obs.time_by_rep == use_time)
+    gene_exp = anndata.X[cell_use, :]
+    if scipy.sparse.issparse(gene_exp):
+        gene_exp = gene_exp.toarray()
+    info = AE(torch.tensor(gene_exp).type(torch.float32))
+    pred_time = AE.latent_mean_all[:,-1]
+    lib_size = AE.l_sample
+
+
+    #test_time = torch.tensor(torch.linspace(5,7,500))
+
+
+    N_time = test_time.shape[0]
+    estimated_gene_exp = torch.zeros(N_time, cell_use.sum(), NvarGenes)
+
+    counter = 0
+    for i in test_time:
+        original_embedding = AE.latent_mean_all.clone()
+        time_representation = AE.expandTime(torch.ones(cell_use.sum(),1) * i)
+        latent_state = torch.hstack((original_embedding[:,0:-1], 
+                                     time_representation
+                                    )
+                                    )
+
+        estimated_gene_exp[counter,:,:] = AE.getGamma(latent_state) * lib_size
+
+        counter += 1
+        
+    pred = np.array([])
+    df_time = np.array([])
+    for i in range(test_time.shape[0]):
+        pred_time = AE.latentMean(estimated_gene_exp[i])[:,-1]
+        pred = np.append(pred, pred_time.detach().numpy())
+        df_time = np.append(df_time, np.repeat(test_time[i].detach().numpy(), pred_time.detach().numpy().shape[0]
+                                              )
+                           )
+
+    df = pd.DataFrame(dict(time = df_time, prediction = pred))
+    return df
+
+
+def df_timeSeries(cell_type, model, anndata, test_time):
+    NvarGenes = anndata.shape[1]
+    
+    AE = model
+    cell_use = (anndata.obs.Idents == cell_type) 
+    gene_exp = anndata.X[cell_use, :]
+    gene_exp = anndata.X[cell_use, :]
+    if scipy.sparse.issparse(gene_exp):
+        gene_exp = gene_exp.toarray()
+    info = AE(torch.tensor(gene_exp).type(torch.float32))
+    pred_time = AE.latent_mean_all[:,-1]
+    lib_size = AE.l_sample
+
+
+    #test_time = torch.tensor(torch.linspace(5,7,500))
+
+
+    N_time = test_time.shape[0]
+    estimated_gene_exp = torch.zeros(N_time, cell_use.sum(), NvarGenes)
+
+    counter = 0
+    for i in test_time:
+        original_embedding = AE.latent_mean_all.clone()
+        time_representation = AE.expandTime(torch.ones(cell_use.sum(),1) * i)
+        latent_state = torch.hstack((original_embedding[:,0:-1], 
+                                     time_representation
+                                    )
+                                    )
+
+        estimated_gene_exp[counter,:,:] = AE.getGamma(latent_state) 
+
+        counter += 1
+    return estimated_gene_exp
+
+def construct_df(estimated_mat, gene_loc,  test_time):
+    time_for_df = np.array([])
+    exp_for_df = np.array([])
+    type_for_df = np.array([])
+    # gene_loc = (gene_idx[gene_idx].index == gene_use)
+    for i in range(estimated_mat.shape[1]):
+        time_for_df = np.append(time_for_df, np.float32(test_time.detach().numpy()))
+        exp_for_df = np.append(exp_for_df, estimated_mat[:,i, gene_loc].detach().numpy())
+        type_for_df = np.append(type_for_df, np.repeat("generated", len(test_time)))
+
+
+    
+    df = pd.DataFrame(dict(time = time_for_df,
+                           exp = exp_for_df,
+                           TYPE = type_for_df,
+                          )
+                     )
+    
+    return df
